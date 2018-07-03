@@ -71,22 +71,18 @@ Route::middleware('auth:api')->put('/perfil', function (Request $request) {
   $user = $request->user();
   $data = $request->all();
 
+  $user->name = $data['name'];
+  $user->email = $data['email'];
+
   if(isset($data['password'])){
     $validator = Validator::make($data, [
       'name' => 'required|string|max:255',
       'email' => ['required','string','email','max:255',Rule::unique('users')->ignore($user->id)],
       'password' => 'required|string|min:6|confirmed',
     ]);
-
-    if($validator->fails()){
-      return $validator->errors();
-    }
-
-    $user->name = $data['name'];
-    $user->email = $data['email'];
+    
     $user->password = bcrypt($data['password']);
 
-    $user->save();
   }else{
 
     $validator = Validator::make($data, [
@@ -94,17 +90,38 @@ Route::middleware('auth:api')->put('/perfil', function (Request $request) {
       'email' => ['required','string','email','max:255',Rule::unique('users')->ignore($user->id)],
     ]);
 
-    if($validator->fails()){
-      return $validator->errors();
-    }
-
-    $user->name = $data['name'];
-    $user->email = $data['email'];
-
-    $user->save();
   }
 
+  if(isset($data['imagem'])){
+    $time = time();
+    $diretorioPai = 'perfils';
+    $diretoriImagem = $diretorioPai.DIRECTORY_SEPARATOR.'perfil_id'.$user->id;
+    $ext = substr($data['imagem'], 11,strpos($data['imagem'], ';')-11);
+    $urlImagem = $diretoriImagem.DIRECTORY_SEPARATOR.$time.'.'.$ext; 
 
+    $file = str_replace('data:image/'.$ext.';base64,', '', $data['imagem']);//data:image/jpeg;base64,
+    $file = base64_decode($file);
+
+    if(!file_exists($diretorioPai)){
+      mkdir($diretorioPai,0700);
+    }
+    if(!file_exists($diretoriImagem)){
+      mkdir($diretoriImagem,0700);
+    }
+
+    file_put_contents($urlImagem, $file);
+
+    $user->imagem = $urlImagem;
+
+  }
+
+  if($validator->fails()){
+    return $validator->errors();
+  }
+
+  $user->save();
+
+  $user->imagem = asset($user->imagem);
   $user->token = $user->createToken($user->email)->accessToken;
   return $user;
 });
