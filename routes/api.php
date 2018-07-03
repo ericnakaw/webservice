@@ -95,9 +95,9 @@ Route::middleware('auth:api')->put('/perfil', function (Request $request) {
   if(isset($data['imagem'])){
     $time = time();
     $diretorioPai = 'perfils';
-    $diretoriImagem = $diretorioPai.DIRECTORY_SEPARATOR.'perfil_id'.$user->id;
+    $diretoriImagem = $diretorioPai.DIRECTORY_SEPARATOR.'perfil_id'.$user->id;//perfils/perfil_id7
     $ext = substr($data['imagem'], 11,strpos($data['imagem'], ';')-11);
-    $urlImagem = $diretoriImagem.DIRECTORY_SEPARATOR.$time.'.'.$ext; 
+    $urlImagem = $diretoriImagem.DIRECTORY_SEPARATOR.$time.'.'.$ext;//perfils/perfil_id7/123456.jpg
 
     $file = str_replace('data:image/'.$ext.';base64,', '', $data['imagem']);//data:image/jpeg;base64,
     $file = base64_decode($file);
@@ -105,6 +105,13 @@ Route::middleware('auth:api')->put('/perfil', function (Request $request) {
     if(!file_exists($diretorioPai)){
       mkdir($diretorioPai,0700);
     }
+
+    if($user->imagem){
+      if(file_exists($user->imagem)){
+        unlink($user->imagem);
+      }
+    }
+
     if(!file_exists($diretoriImagem)){
       mkdir($diretoriImagem,0700);
     }
