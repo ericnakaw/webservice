@@ -93,6 +93,40 @@ Route::middleware('auth:api')->put('/perfil', function (Request $request) {
   }
 
   if(isset($data['imagem'])){
+
+    Validator::extend('base64image', function ($attribute, $value, $parameters, $validator) {
+      $explode = explode(',', $value);
+      $allow = ['png', 'jpg', 'jpeg', 'svg'];
+      $format = str_replace(
+        [
+          'data:image/',
+          ';',
+          'base64',
+        ],
+        [
+          '', '', '',
+        ],
+        $explode[0]
+      );
+        // check file format
+      if (!in_array($format, $allow)) {
+        return false;
+      }
+        // check base64 format
+      if (!preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $explode[1])) {
+        return false;
+      }
+      return true;
+    });
+
+    $validator = Validator::make($data, [
+      'imagem' => 'base64image'
+    ],['base64image'=>'Imagem inválida']);
+
+    if($validator->fails()){
+      return $validator->errors();
+    }
+
     $time = time();
     $diretorioPai = 'perfils';
     $diretoriImagem = $diretorioPai.DIRECTORY_SEPARATOR.'perfil_id'.$user->id;//perfils/perfil_id7
