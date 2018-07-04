@@ -54,6 +54,7 @@ Route::post('/login',function(Request $request) {
 
   if (Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
   	$user = auth()->user();
+    $user->imagem = asset($user->imagem);
     $user->token = $user->createToken($user->email)->accessToken;
     return $user;
   }else{
@@ -73,6 +74,7 @@ Route::middleware('auth:api')->put('/perfil', function (Request $request) {
 
   $user->name = $data['name'];
   $user->email = $data['email'];
+  $user->descricao = $data['descricao'];
 
   if(isset($data['password'])){
     $validator = Validator::make($data, [
