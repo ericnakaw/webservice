@@ -21,6 +21,7 @@ Route::middleware('auth:api')->put('/perfil','UsersController@perfil');
 
 Route::get('/testes',function(){
     $user = User::find(1);
+    $user2 = User::find(3);
     /*
     $user->conteudos()->create([
         'titulo' => 'Conteudo 3',
@@ -31,4 +32,13 @@ Route::get('/testes',function(){
     ]);
     return $user->conteudos;
     */
+    
+    /*
+    //Add Amigos
+    $user->amigos()->attach($user2->id);
+    $user->amigos()->detach($user2->id);
+    $user->amigos()->toggle($user2->id);
+    */
+    
+    return $user->amigos;
 });
